@@ -37,28 +37,32 @@ QueryMind/
 │
 ├── backend/
 │   │
-│   ├── main.py                     # FastAPI entry point
-│   ├── requirements.txt            # Python dependencies
+│   ├── .env                         # OpenRouter & application configuration
+│   ├── config.py                    # Environment & application settings
+│   ├── main.py                      # FastAPI application entry point
+│   ├── models.py                    # Pydantic request/response models
+│   ├── seed.py                      # Sample database seeding
+│   ├── requirements.txt             # Python dependencies
+│   ├── Dockerfile                   # Backend container configuration
 │   │
-│   ├── ai/
-│   │   ├── sql_generator.py        # LangChain + OpenRouter SQL generation
-│   │   └── prompt_templates.py     # Prompt engineering templates
+│   ├── chains/
+│   │   ├── sql_chain.py             # LangChain SQL generation workflow
+│   │   ├── safety.py                # SQL safety validation layer
+│   │   └── __init__.py
 │   │
-│   ├── database/
-│   │   ├── connection_manager.py   # Database connections
-│   │   ├── schema_extractor.py     # Schema discovery
-│   │   └── query_executor.py       # Query execution engine
+│   ├── db/
+│   │   ├── connector.py             # Database connection manager
+│   │   ├── schema.py                # Schema extraction & inspection
+│   │   └── __init__.py
 │   │
-│   ├── routes/
-│   │   ├── query.py                # SQL generation APIs
-│   │   ├── schema.py               # Schema explorer APIs
-│   │   └── history.py              # Query history APIs
+│   ├── routers/
+│   │   ├── table_inspector.py       # Table inspection endpoints
+│   │   └── __init__.py
 │   │
-│   ├── services/
-│   │   ├── analytics.py            # Analytics processing
-│   │   └── safety_guard.py         # SQL validation & protection
-│   │
-│   └── .env                        # OpenRouter configuration
+│   └── tests/
+│       ├── test_queries.py          # Query generation tests
+│       ├── test_safety.py           # SQL safety tests
+│       └── __init__.py
 │
 ├── frontend/
 │   │
@@ -318,7 +322,6 @@ Before installing QueryMind, ensure you have:
 
 ```bash
 git clone https://github.com/LoganthP/QueryMind.git
-
 cd QueryMind
 ```
 
@@ -384,40 +387,72 @@ OPENROUTER_API_KEY=sk-or-v1-xxxxxxxxxxxxxxxx
 
 We recommend using a Python virtual environment to manage dependencies.
 
-### Windows
+### Windows (PowerShell)
+
+#### Create a Virtual Environment
 
 ```powershell
-# Create a virtual environment
-python -m venv .venv
+py -3.13 -m venv .venv
+```
 
-# Activate the virtual environment
-.\.venv\Scripts\activate
+> ⚠️ Do **NOT** use:
+>
+> ```powershell
+> python -m venv .venv
+> ```
+>
+> On some Windows systems, `python` points to Python 3.14, which may cause dependency compatibility issues.
 
-# Install dependencies
+---
+
+#### Activate the Virtual Environment
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+> ⚠️ Do **NOT** use:
+>
+> ```powershell
+> .\.venv\Scripts\activate
+> ```
+>
+> That script is intended for Bash and will not work correctly in PowerShell.
+
+---
+
+#### Install Dependencies
+
+```powershell
 pip install -r backend/requirements.txt
+```
 
-# Start the server
+---
+
+#### Start the Backend Server
+
+```powershell
 uvicorn main:app --reload --app-dir backend
+```
 
-# Alternative: If 'uvicorn' is not recognized
+If `uvicorn` is not recognized:
+
+```powershell
 .\.venv\Scripts\uvicorn.exe main:app --reload --app-dir backend
 ```
+
+---
 
 ### macOS / Linux
 
 ```bash
-# Create a virtual environment
 python3 -m venv .venv
-
-# Activate the virtual environment
 source .venv/bin/activate
-
-# Install dependencies
 pip install -r backend/requirements.txt
-
-# Start the server
 uvicorn main:app --reload --app-dir backend
 ```
+
+---
 
 ### Backend Features
 
