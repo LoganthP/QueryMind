@@ -539,4 +539,3 @@ Both frontend and backend services will start automatically with hot-reloading e
 - 📤 Export to Excel / CSV
 - ⚡ Query Performance Insights
 - 🧠 AI Data Analyst Assistant
----
