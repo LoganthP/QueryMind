@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QueryMind - AI SQL Assistant</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Tabler Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+    <style>
+        :root {
+            /* Dark Mode (Default) */
+            --bg:        #0D0F14;
+            --surface:   #161921;
+            --elevated:  #1E2130;
+            --border:    #2A2D3A;
+            --border-hi: #3D4155;
+            --accent:    #6B66FF;
+            --accent-lo: rgba(107,102,255,0.12);
+            --accent-hi: #8B87FF;
+            --text-1:    #F1F3F9;
+            --text-2:    #8B90A7;
+            --text-3:    #555A72;
+            --green:     #34D399;
+            --amber:     #FBBF24;
+            --red:       #F87171;
+            --sql-kw:    #7DD3FC;
+            --sql-fn:    #86EFAC;
+            --sql-str:   #FCA5A5;
+            --sql-num:   #FCD34D;
+        }
+
+        body.light {
+            /* Light Mode Overrides */
+            --bg:        #FFFFFF;
+            --surface:   #F8F9FC;
+            --elevated:  #F1F3F9;
+            --border:    #E5E7EF;
+            --border-hi: #CBD0DE;
+            --text-1:    #0D0F14;
+            --text-2:    #555A72;
+            --text-3:    #9CA3B0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-1);
+            font-size: 16px;
+            line-height: 1.7;
+            transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            color: var(--text-1);
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .code-font {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+        }
+
+        /* Nav */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            height: 56px;
+            background: rgba(13,15,20,0.85); /* Default dark nav blur */
+            backdrop-filter: blur(12px);
+            border-bottom: 0.5px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+        }
+        
+        body.light nav {
+            background: rgba(255,255,255,0.85);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 28px;
+            height: 28px;
+            background-color: #0D0F14; /* Always dark */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .wordmark {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--text-1);
+        }
+
+        .nav-center {
+            display: flex;
+            gap: 24px;
+        }
+
+        .nav-link {
+            font-size: 14px;
+            color: var(--text-2);
+            transition: color 150ms;
+            position: relative;
+            padding: 18px 0;
+        }
+
+        .nav-link:hover {
+            color: var(--text-1);
+        }
+
+        .nav-link.active {
+            color: var(--text-1);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--accent);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn-github {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            border: 0.5px solid var(--border-hi);
+            padding: 4px 10px;
+            border-radius: 9999px;
+            color: var(--text-2);
+            transition: background 150ms;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .btn-github:hover {
+            background: var(--elevated);
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: #fff;
+            padding: 0 16px;
+            height: 36px;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            border: none;
+            cursor: pointer;
+            transition: background-color 150ms, transform 150ms;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hi);
+            transform: scale(1.02);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--text-1);
+            padding: 0 16px;
+            height: 36px;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            border: 0.5px solid var(--border-hi);
+            cursor: pointer;
+            transition: background-color 150ms;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--elevated);
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: none;
+            color: var(--text-2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+
+        .theme-toggle:hover {
+            color: var(--text-1);
+            background: var(--elevated);
+        }
+
+        .menu-btn {
+            display: none;
+            background: transparent;
+            border: none;
+            color: var(--text-1);
+            cursor: pointer;
+        }
+
+        /* Hero */
+        .hero {
+            position: relative;
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 120px 24px 80px;
+            text-align: center;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: radial-gradient(circle, rgba(107,102,255,0.06) 1px, transparent 1px);
+            background-size: 28px 28px;
+            z-index: -2;
+        }
+
+        .hero-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: rgba(107,102,255,0.04);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 0.5px solid var(--border-hi);
+            background-color: var(--elevated);
+            color: var(--text-2);
+            font-size: 12px;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 {
+            font-size: 56px;
+            line-height: 1.1;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 .accent-text {
+            color: var(--accent);
+        }
+
+        .hero p.subheadline {
+            font-size: 18px;
+            color: var(--text-2);
+            max-width: 560px;
+            margin: 0 auto 40px;
+        }
+
+        .hero-ctas {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+        
+        .hero-ctas .btn-primary, .hero-ctas .btn-secondary {
+            height: auto;
+            padding: 12px 28px;
+            font-size: 15px;
+        }
+
+        .social-proof {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 13px;
+            color: var(--text-3);
+        }
+
+        .avatars {
+            display: flex;
+        }
+
+        .avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--bg);
+            margin-left: -8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .avatar:first-child { margin-left: 0; }
+
+        /* Terminal Mockup */
+        .terminal {
+            background-color: #0A0C10;
+            border: 0.5px solid var(--border-hi);
+            border-radius: 16px;
+            max-width: 720px;
+            margin: 60px auto 0;
+            text-align: left;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .terminal-header {
+            height: 36px;
+            background: #11141A;
+            border-bottom: 0.5px solid #2A2D3A;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+        }
+
+        .traffic-lights {
+            display: flex;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-title {
+            font-size: 12px;
+            color: #555A72;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .dialect-badge {
+            font-size: 10px;
+            color: #8B90A7;
+            border: 0.5px solid #3D4155;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .terminal-body {
+            display: flex;
+        }
+
+        .pane {
+            padding: 24px;
+            flex: 1;
+        }
+
+        .pane-left {
+            border-right: 0.5px solid #2A2D3A;
+        }
+
+        .pane-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #555A72;
+            margin-bottom: 12px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nl-input {
+            background: rgba(255,255,255,0.03);
+            border: 0.5px solid #3D4155;
+            border-radius: 8px;
+            padding: 12px;
+            min-height: 80px;
+            margin-bottom: 16px;
+            color: #F1F3F9;
+        }
+        
+        .nl-text {
+            display: inline;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background: var(--accent);
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+            margin-left: 4px;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .sql-output {
+            color: #F1F3F9;
+            line-height: 1.5;
+            white-space: pre;
+        }
+
+        /* SQL Syntax colors matching dark mode tokens */
+        .sql-kw { color: var(--sql-kw); }
+        .sql-fn { color: var(--sql-fn); }
+        .sql-str { color: var(--sql-str); }
+        .sql-num { color: var(--sql-num); }
+
+        /* Trust Bar */
+        .trust-bar {
+            background-color: var(--surface);
+            border-top: 0.5px solid var(--border);
+            border-bottom: 0.5px solid var(--border);
+            padding: 24px 0;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .trust-label {
+            font-size: 11px;
+            color: var(--text-3);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 16px;
+        }
+
+        .marquee-wrapper {
+            display: flex;
+            width: 200%;
+            animation: marquee 30s linear infinite;
+        }
+
+        .marquee-content {
+            display: flex;
+            justify-content: space-around;
+            width: 50%;
+        }
+
+        .logo-item {
+            font-weight: 700;
+            font-size: 20px;
+            color: var(--text-3);
+            transition: color 200ms;
+            cursor: default;
+        }
+        
+        .logo-item:hover {
+            color: var(--text-1);
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Features */
+        .features {
+            max-width: 960px;
+            margin: 80px auto;
+            padding: 0 24px;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 64px;
+        }
+
+        .section-header h2 {
+            font-size: 36px;
+            margin-bottom: 12px;
+        }
+
+        .section-header p {
+            color: var(--text-2);
+            font-size: 18px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .feature-card {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+            transition: border-color 200ms, background 200ms;
+        }
+
+        .feature-card:hover {
+            border-color: var(--border-hi);
+            background: var(--elevated);
+        }
+
+        .feature-icon {
+            width: 28px;
+            height: 28px;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        .feature-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .feature-desc {
+            font-size: 14px;
+            color: var(--text-2);
+            line-height: 1.6;
+        }
+
+        /* How it works */
+        .how-it-works {
+            max-width: 800px;
+            margin: 80px auto;
+            padding: 0 24px;
+        }
+
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .step-connector {
+            position: absolute;
+            top: 24px;
+            left: 40px;
+            right: 40px;
+            height: 1px;
+            border-top: 1px dashed var(--border-hi);
+            z-index: -1;
+        }
+
+        .step {
+            flex: 1;
+            padding: 0 24px;
+            text-align: left;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .step-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .step-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .step-desc {
+            font-size: 14px;
+            color: var(--text-2);
+            margin-bottom: 24px;
+        }
+
+        .step-visual {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 12px;
+            color: var(--text-2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 60px;
+        }
+
+        .live-demo {
+            max-width: 960px;
+            margin: 80px auto;
+            padding: 0 24px;
+            text-align: center;
+        }
+
+        .demo-embed {
+            width: 100%;
+            height: 600px;
+            border: 0.5px solid var(--border);
+            border-radius: 16px;
+            background: var(--surface);
+            margin-top: 32px;
+            overflow: hidden;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 0.5px solid var(--border);
+            padding: 40px 24px;
+            text-align: center;
+            color: var(--text-3);
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-center { display: none; }
+            .nav-right { display: none; }
+            .menu-btn { display: block; }
+            
+            .hero h1 { font-size: 36px; }
+            .hero p.subheadline { font-size: 16px; }
+            
+            .terminal-body { flex-direction: column; }
+            .pane-left { border-right: none; border-bottom: 0.5px solid #2A2D3A; }
+            
+            .grid { grid-template-columns: 1fr; }
+            
+            .steps { flex-direction: column; gap: 40px; }
+            .step-connector { display: none; }
+            .step { padding: 0; }
+        }
+        
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* Mobile Drawer */
+        .drawer {
+            position: fixed;
+            top: 56px;
+            right: -100%;
+            width: 100%;
+            height: calc(100vh - 56px);
+            background: var(--bg);
+            transition: right 300ms ease;
+            z-index: 90;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .drawer.open {
+            right: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-left">
+            <div class="logo">&gt;_</div>
+            <div class="wordmark">QueryMind</div>
+        </div>
+        <div class="nav-center">
+            <a href="#features" class="nav-link">Features</a>
+            <a href="#demo" class="nav-link">Demo</a>
+            <a href="#how" class="nav-link">How it works</a>
+        </div>
+        <div class="nav-right">
+            <button class="btn-primary">Get started free</button>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                <i class="ti ti-sun" id="themeIcon"></i>
+            </button>
+        </div>
+        <button class="menu-btn" id="menuToggle">
+            <i class="ti ti-menu-2" size="24"></i>
+        </button>
+    </nav>
+    
+    <div class="drawer" id="mobileDrawer">
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#demo" class="nav-link">Demo</a>
+        <a href="#how" class="nav-link">How it works</a>
+        <button class="btn-primary" style="margin-top: 16px;">Get started free</button>
+        <button class="theme-toggle" id="mobileThemeToggle" style="margin-top: 16px;">
+            <i class="ti ti-sun" id="mobileThemeIcon"></i> Toggle Theme
+        </button>
+    </div>
+
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-glow"></div>
+        
+        <div class="badge">
+            <i class="ti ti-sparkles" style="color: var(--accent);"></i>
+            Powered by OpenRouter · 50+ AI models
+        </div>
+        
+        <h1>Ask your database<br>anything, <span class="accent-text">in plain English.</span></h1>
+        
+        <p class="subheadline">
+            QueryMind converts natural language into precise SQL — instantly. Connect any database, pick your AI model, and start querying in seconds.
+        </p>
+        
+        <div class="hero-ctas">
+            <button class="btn-primary">Start querying free &rarr;</button>
+        </div>
+        
+        <div class="social-proof">
+            <div class="avatars">
+                <div class="avatar" style="background:#EF4444; z-index:5;">JD</div>
+                <div class="avatar" style="background:#3B82F6; z-index:4;">AL</div>
+                <div class="avatar" style="background:#10B981; z-index:3;">MK</div>
+                <div class="avatar" style="background:#F59E0B; z-index:2;">RS</div>
+                <div class="avatar" style="background:#8B5CF6; z-index:1;">TC</div>
+            </div>
+            Trusted by 2,400+ developers · Works with SQLite, PostgreSQL, MySQL
+        </div>
+        
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="traffic-lights">
+                    <div class="dot" style="background:#F87171"></div>
+                    <div class="dot" style="background:#FBBF24"></div>
+                    <div class="dot" style="background:#34D399"></div>
+                </div>
+                <div class="terminal-title">QueryMind &mdash; sample.db</div>
+                <div class="dialect-badge">sqlite</div>
+            </div>
+            <div class="terminal-body">
+                <div class="pane pane-left">
+                    <div class="pane-label">Ask your database</div>
+                    <div class="nl-input">
+                        <span class="nl-text" id="typewriterText"></span><span class="cursor" id="typewriterCursor"></span>
+                    </div>
+                    <button class="btn-primary" style="height:28px; font-size:12px; padding:0 12px;">Run Query</button>
+                </div>
+                <div class="pane">
+                    <div class="pane-label">
+                        Generated SQL
+                        <i class="ti ti-copy" style="cursor:pointer"></i>
+                    </div>
+                    <div class="sql-output code-font" id="sqlOutputBlock"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="trust-bar">
+        <div class="trust-label">Works with your stack</div>
+        <div class="marquee-wrapper">
+            <div class="marquee-content">
+                <div class="logo-item">SQLite</div>
+                <div class="logo-item">PostgreSQL</div>
+                <div class="logo-item">MySQL</div>
+                <div class="logo-item">Supabase</div>
+                <div class="logo-item">PlanetScale</div>
+                <div class="logo-item">Turso</div>
+            </div>
+            <div class="marquee-content" aria-hidden="true">
+                <div class="logo-item">SQLite</div>
+                <div class="logo-item">PostgreSQL</div>
+                <div class="logo-item">MySQL</div>
+                <div class="logo-item">Supabase</div>
+                <div class="logo-item">PlanetScale</div>
+                <div class="logo-item">Turso</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="section-header">
+            <h2>Everything you need to query smarter</h2>
+            <p>Built for developers who think in English but ship in SQL.</p>
+        </div>
+        
+        <div class="grid">
+            <div class="feature-card">
+                <i class="ti ti-message-2 feature-icon"></i>
+                <div class="feature-title">Ask in plain English</div>
+                <div class="feature-desc">Type any question about your data &mdash; QueryMind turns it into precise SQL instantly, no syntax required.</div>
+            </div>
+            <div class="feature-card">
+                <i class="ti ti-cpu feature-icon"></i>
+                <div class="feature-title">50+ AI models via OpenRouter</div>
+                <div class="feature-desc">Switch between Claude, GPT-4o, Gemini, and Llama with one click. Pick the model that fits your budget and task.</div>
+            </div>
+            <div class="feature-card">
+                <i class="ti ti-sitemap feature-icon"></i>
+                <div class="feature-title">Live schema explorer</div>
+                <div class="feature-desc">Browse tables, columns, types, and foreign keys in a collapsible sidebar. Click any table to add context to your query.</div>
+            </div>
+            <div class="feature-card">
+                <i class="ti ti-chart-dots-3 feature-icon"></i>
+                <div class="feature-title">Instant data visualizations</div>
+                <div class="feature-desc">Switch to the Analytics tab to see your results as bar, line, pie, scatter, heatmap, or cluster charts &mdash; auto-detected.</div>
+            </div>
+            <div class="feature-card">
+                <i class="ti ti-history feature-icon"></i>
+                <div class="feature-title">Full query history</div>
+                <div class="feature-desc">Every NL prompt and generated SQL saved locally. Re-run or refine any past query in one click.</div>
+            </div>
+            <div class="feature-card">
+                <i class="ti ti-database feature-icon"></i>
+                <div class="feature-title">SQLite, PostgreSQL &amp; MySQL</div>
+                <div class="feature-desc">Connect via file upload, connection string, or use the built-in sample database to start immediately.</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="how-it-works" id="how">
+        <div class="section-header">
+            <h2>From question to result in 3 steps</h2>
+        </div>
+        
+        <div class="steps">
+            <div class="step-connector"></div>
+            
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-num">01</div>
+                    <i class="ti ti-plug-connected" style="font-size:32px; color:var(--accent)"></i>
+                </div>
+                <div class="step-title">Connect your database</div>
+                <div class="step-desc">Upload a SQLite file, paste a PostgreSQL connection string, or use the sample database. Done in 10 seconds.</div>
+                <div class="step-visual">
+                    <span style="color:var(--green)">●</span>&nbsp;Connected &middot; sample.db
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-num">02</div>
+                    <i class="ti ti-keyboard" style="font-size:32px; color:var(--accent)"></i>
+                </div>
+                <div class="step-title">Type your question</div>
+                <div class="step-desc">Write what you want in plain English. Be as specific or vague as you like &mdash; QueryMind handles the translation.</div>
+                <div class="step-visual" style="justify-content:flex-start; text-align:left;">
+                    <span style="opacity:0.5">Show me top users...</span><span class="cursor" style="height:12px;width:6px;margin-left:2px"></span>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-num">03</div>
+                    <i class="ti ti-table" style="font-size:32px; color:var(--accent)"></i>
+                </div>
+                <div class="step-title">Get SQL + results instantly</div>
+                <div class="step-desc">See the generated SQL with a plain-English explanation, then explore results in a table or as visualizations.</div>
+                <div class="step-visual" style="flex-direction:column; gap:4px; align-items:flex-start">
+                    <div style="display:flex;gap:4px;width:100%;"><div style="flex:1;height:4px;background:var(--border-hi)"></div><div style="flex:1;height:4px;background:var(--border-hi)"></div><div style="flex:1;height:4px;background:var(--border-hi)"></div></div>
+                    <div style="display:flex;gap:4px;width:100%;"><div style="flex:1;height:4px;background:var(--border)"></div><div style="flex:1;height:4px;background:var(--border)"></div><div style="flex:1;height:4px;background:var(--border)"></div></div>
+                    <div style="display:flex;gap:4px;width:100%;"><div style="flex:1;height:4px;background:var(--border)"></div><div style="flex:1;height:4px;background:var(--border)"></div><div style="flex:1;height:4px;background:var(--border)"></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="live-demo" id="demo">
+        <div class="section-header">
+            <h2>Try it right now &mdash; no signup</h2>
+            <p>The sample database is already connected. Just type a question.</p>
+        </div>
+        
+        <!-- Live App Embed -->
+        <div class="demo-embed">
+            <iframe src="http://localhost:5173" width="100%" height="100%" frameborder="0"></iframe>
+        </div>
+    </section>
+
+    <footer>
+        <div style="margin-bottom: 16px;">
+            <div class="logo" style="margin: 0 auto;">&gt;_</div>
+        </div>
+        <p>QueryMind &copy; 2026. Built for developers.</p>
+    </footer>
+
+    <script>
+        // Theme Toggle
+        const body = document.body;
+        const toggleBtns = [document.getElementById('themeToggle'), document.getElementById('mobileThemeToggle')];
+        const toggleIcons = [document.getElementById('themeIcon'), document.getElementById('mobileThemeIcon')];
+
+        // Check local storage or system preference
+        const isLight = localStorage.getItem('theme') === 'light' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: light)').matches);
+        
+        if (isLight) {
+            body.classList.add('light');
+            toggleIcons.forEach(icon => { icon.classList.replace('ti-sun', 'ti-moon'); });
+        }
+
+        toggleBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                body.classList.toggle('light');
+                const isNowLight = body.classList.contains('light');
+                localStorage.setItem('theme', isNowLight ? 'light' : 'dark');
+                
+                toggleIcons.forEach(icon => {
+                    if (isNowLight) {
+                        icon.classList.replace('ti-sun', 'ti-moon');
+                    } else {
+                        icon.classList.replace('ti-moon', 'ti-sun');
+                    }
+                });
+            });
+        });
+
+        // Mobile Menu Drawer
+        const menuBtn = document.getElementById('menuToggle');
+        const drawer = document.getElementById('mobileDrawer');
+        
+        menuBtn.addEventListener('click', () => {
+            drawer.classList.toggle('open');
+            const icon = menuBtn.querySelector('i');
+            if (drawer.classList.contains('open')) {
+                icon.classList.replace('ti-menu-2', 'ti-x');
+            } else {
+                icon.classList.replace('ti-x', 'ti-menu-2');
+            }
+        });
+
+        // Typewriter Animation
+        const targetText = "Show me the top 10 products by revenue last quarter,\ngrouped by category";
+        const sqlResult = `
+<span class="sql-kw">SELECT</span>
+  p.category,
+  p.name,
+  <span class="sql-fn">SUM</span>(oi.quantity * oi.unit_price) <span class="sql-kw">AS</span> revenue
+<span class="sql-kw">FROM</span> order_items oi
+<span class="sql-kw">JOIN</span> products p <span class="sql-kw">ON</span> p.id = oi.product_id
+<span class="sql-kw">JOIN</span> orders o <span class="sql-kw">ON</span> o.id = oi.order_id
+<span class="sql-kw">WHERE</span> o.created_at >= <span class="sql-fn">DATE</span>(<span class="sql-str">'now'</span>, <span class="sql-str">'-3 months'</span>)
+<span class="sql-kw">GROUP BY</span> p.category, p.name
+<span class="sql-kw">ORDER BY</span> revenue <span class="sql-kw">DESC</span>
+<span class="sql-kw">LIMIT</span> <span class="sql-num">10</span>;`.trim();
+
+        const typeEl = document.getElementById('typewriterText');
+        const cursorEl = document.getElementById('typewriterCursor');
+        const sqlEl = document.getElementById('sqlOutputBlock');
+        
+        let charIndex = 0;
+        
+        function typeWriter() {
+            if (charIndex < targetText.length) {
+                typeEl.textContent += targetText.charAt(charIndex);
+                charIndex++;
+                setTimeout(typeWriter, Math.random() * 50 + 30);
+            } else {
+                setTimeout(() => {
+                    sqlEl.innerHTML = sqlResult;
+                }, 400);
+            }
+        }
+
+        // Intersection Observer to start typing when visible
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    setTimeout(typeWriter, 500);
+                    observer.disconnect();
+                }
+            });
+        }, { threshold: 0.5 });
+
+        observer.observe(document.querySelector('.terminal'));
+
+    </script>
+</body>
+</html>

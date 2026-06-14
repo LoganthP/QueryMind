@@ -1,0 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+/* ─── Theme Variables ──────────────────────────────────────── */
+
+html.dark {
+  --qm-bg-primary: #0D0F14;
+  --qm-bg-surface: #111318;
+  --qm-bg-surface-variant: #1e2025;
+  --qm-bg-elevated: #1E2130;
+  --qm-on-surface: #e2e2e9;
+  --qm-on-surface-variant: #c4c7c5;
+  --qm-secondary-container: #444650;
+  --qm-on-secondary-container: #c4c7c5;
+  --qm-outline-variant: rgba(255,255,255,0.15);
+  --qm-text-muted: #8B90A7;
+  --qm-text-high-contrast: #ffffff;
+  --qm-border-subtle: #2A2D3A;
+  --qm-on-error: #690005;
+  --qm-error-text: #ffb4ab;
+  --qm-on-error-container: #690005;
+  --qm-backdrop: rgba(10, 10, 15, 0.80);
+}
+
+html.light {
+  --qm-bg-primary: #FFFFFF;
+  --qm-bg-surface: #F8F9FC;
+  --qm-bg-surface-variant: #EDF0F5;
+  --qm-bg-elevated: #F1F3F9;
+  --qm-on-surface: #1a1c24;
+  --qm-on-surface-variant: #444650;
+  --qm-secondary-container: #DDE1EB;
+  --qm-on-secondary-container: #444650;
+  --qm-outline-variant: rgba(0,0,0,0.12);
+  --qm-text-muted: #9CA3B0;
+  --qm-text-high-contrast: #0D0F14;
+  --qm-border-subtle: #E5E7EF;
+  --qm-on-error: #690005;
+  --qm-error-text: #BA1A1A;
+  --qm-on-error-container: #ffffff;
+  --qm-backdrop: rgba(0, 0, 0, 0.40);
+}
+
+/* ─── Tailwind Theme Tokens ────────────────────────────────── */
+
+@theme {
+  --color-surface: var(--qm-bg-surface);
+  --color-surface-variant: var(--qm-bg-surface-variant);
+  --color-on-surface: var(--qm-on-surface);
+  --color-on-surface-variant: var(--qm-on-surface-variant);
+  --color-secondary-container: var(--qm-secondary-container);
+  --color-on-secondary-container: var(--qm-on-secondary-container);
+  --color-outline-variant: var(--qm-outline-variant);
+  --color-text-muted: var(--qm-text-muted);
+  --color-text-high-contrast: var(--qm-text-high-contrast);
+  --color-on-error: var(--qm-on-error);
+  --color-syntax-keyword: #c678dd;
+  --color-syntax-string: #98c379;
+  --color-syntax-number: #FCD34D;
+  --color-syntax-function: #61afef;
+
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* ─── Base Styles ──────────────────────────────────────────── */
+
+@layer base {
+  html {
+    transition: background-color 200ms ease, color 200ms ease;
+  }
+
+  body {
+    background-color: var(--qm-bg-surface);
+    color: var(--qm-on-surface);
+    font-family: var(--font-sans);
+  }
+}
+
+/* ─── Utility classes for theme-dependent values ───────────── */
+/* These allow Tailwind classes to reference theme-aware vars   */
+
+.bg-qm-primary   { background-color: var(--qm-bg-primary); }
+.bg-qm-elevated   { background-color: var(--qm-bg-elevated); }
+.border-qm-subtle { border-color: var(--qm-border-subtle); }
+.text-qm-error    { color: var(--qm-error-text); }
+.bg-qm-error      { background-color: var(--qm-error-text); }
+.text-qm-on-error-container { color: var(--qm-on-error-container); }
+.bg-qm-backdrop   { background-color: var(--qm-backdrop); }
+
+/* ─── Scrollbar Styling ────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--qm-secondary-container);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--qm-text-muted);
+}
+
+/* ─── Animation Utilities ──────────────────────────────────── */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 200ms ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 250ms ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 250ms ease-out;
+}
